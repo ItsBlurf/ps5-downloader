@@ -1,0 +1,25 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+.venv/
+build/
+release/
+*.egg-info/
+.DS_Store
+
+# Local runtime state
+.ps5-downloader/
+downloads/
+tmp/
+logs/
+*.sqlite3
+*.sqlite3-shm
+*.sqlite3-wal
+*.part
+
+!dist/
+dist/*
+!dist/.gitkeep
+!dist/README.md
+!dist/ps5-downloader.elf

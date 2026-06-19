@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PS5 Downloader</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header>
+    <h1>PS5 Downloader</h1>
+    <nav>
+      <button data-tab="queue">Queue</button>
+      <button data-tab="settings">Settings</button>
+      <button data-tab="logs">Logs</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="queue" class="tab active">
+      <form id="link-form">
+        <textarea id="links" placeholder="Paste one URL, many URLs, or an HTML snippet"></textarea>
+        <button type="submit">Add Links</button>
+      </form>
+      <div id="downloads"></div>
+    </section>
+
+    <section id="settings" class="tab">
+      <form id="settings-form">
+        <label>Download directory <input name="download_dir"></label>
+        <label>Temp directory <input name="temp_dir"></label>
+        <label>Max concurrent downloads <input name="max_concurrent_downloads" type="number" min="1"></label>
+        <label>Per-download connections <input name="per_download_connections" type="number" min="1"></label>
+        <label>Speed limit bytes/sec <input name="speed_limit_bytes" type="number" min="0"></label>
+        <label>User agent <input name="user_agent"></label>
+        <label>Conflict behavior
+          <select name="conflict_behavior">
+            <option value="auto-rename">auto-rename</option>
+            <option value="overwrite">overwrite</option>
+            <option value="skip">skip</option>
+          </select>
+        </label>
+        <button type="submit">Save</button>
+      </form>
+      <div class="bookmarklet">
+        <a id="bookmarklet" href="#">Send to PS5 Downloader</a>
+      </div>
+      <div id="plugins"></div>
+    </section>
+
+    <section id="logs" class="tab">
+      <pre id="log-output"></pre>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>

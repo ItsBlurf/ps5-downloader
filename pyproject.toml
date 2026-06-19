@@ -1,0 +1,22 @@
+[project]
+name = "ps5-downloader"
+version = "0.1.0"
+description = "Lightweight web/API download manager aimed at PS5 homebrew workflows."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{ name = "ps5-downloader contributors" }]
+
+[project.scripts]
+ps5-downloader = "ps5_downloader.cli.main:main"
+ps5-downloader-gui = "ps5_downloader.desktop.app:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+ps5_downloader = ["server/static/*"]

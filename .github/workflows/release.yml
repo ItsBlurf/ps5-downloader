@@ -1,0 +1,62 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Tk runtime
+        run: sudo apt-get update && sudo apt-get install -y python3-tk fuse libfuse2
+      - name: Build Linux executable
+        run: scripts/build-desktop-linux.sh
+      - name: Build AppImage
+        run: scripts/build-appimage.sh
+      - name: Add PS5 ELF asset
+        run: |
+          cp dist/ps5-downloader.elf release/ps5-downloader-0.1.0.elf
+          sha256sum release/ps5-downloader-0.1.0.elf > release/ps5-downloader-0.1.0.elf.sha256
+      - uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            release/ps5-downloader-gui-linux-x86_64
+            release/ps5-downloader-gui-linux-x86_64.sha256
+            release/PS5_Downloader-0.1.0-x86_64.AppImage
+            release/PS5_Downloader-0.1.0-x86_64.AppImage.sha256
+            release/ps5-downloader-0.1.0.elf
+            release/ps5-downloader-0.1.0.elf.sha256
+
+  windows:
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install PyInstaller
+        run: python -m pip install pyinstaller
+      - name: Build Windows EXE
+        run: |
+          $env:PYTHONPATH="src"
+          pyinstaller --clean --noconfirm packaging/ps5-downloader-gui.spec
+          New-Item -ItemType Directory -Force release
+          Copy-Item dist/ps5-downloader-gui.exe release/ps5-downloader-gui-windows-x86_64.exe
+          Get-FileHash release/ps5-downloader-gui-windows-x86_64.exe -Algorithm SHA256 | ForEach-Object { "$($_.Hash.ToLower())  release/ps5-downloader-gui-windows-x86_64.exe" } | Set-Content release/ps5-downloader-gui-windows-x86_64.exe.sha256
+      - uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            release/ps5-downloader-gui-windows-x86_64.exe
+            release/ps5-downloader-gui-windows-x86_64.exe.sha256

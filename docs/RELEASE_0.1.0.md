@@ -12,6 +12,7 @@ Initial public release.
 - Direct HTTP downloads on PS5 with `.part` files and 4 ranged segments when supported.
 - Helper relay for HTTPS hoster files.
 - Public hoster plugins for MediaFire, Buzzheavier, Rootz, AkiraBox metadata, 1fichier metadata/manual flow, GitHub releases, generic redirects, and generic HTML file links.
+- Native API hardening: client socket timeouts, detached request handling, and full CORS method headers so one stalled request does not freeze the control API.
 
 ## Assets
 

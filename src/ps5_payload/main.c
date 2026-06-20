@@ -40,6 +40,7 @@
 #define BYTE_UPDATE_STEP (256 * 1024)
 #define SOCKET_BUFFER_BYTES (1024 * 1024)
 #define SOCKET_TIMEOUT_SEC 20
+#define CLIENT_TIMEOUT_SEC 8
 #define HELPER_TIMEOUT_SEC 45
 #define SEGMENTED_MIN_BYTES (8 * 1024 * 1024)
 #define SEGMENTED_CONNECTIONS 4
@@ -255,7 +256,7 @@ static void send_response(int client, const char *status, const char *content_ty
                             "Content-Length: %zu\r\n"
                             "Connection: close\r\n"
                             "Access-Control-Allow-Origin: *\r\n"
-                            "Access-Control-Allow-Methods: GET,POST,OPTIONS\r\n"
+                            "Access-Control-Allow-Methods: GET,POST,PUT,DELETE,OPTIONS\r\n"
                             "Access-Control-Allow-Headers: content-type\r\n"
                             "\r\n",
                             status, content_type, body_len);
@@ -263,6 +264,14 @@ static void send_response(int client, const char *status, const char *content_ty
     write_all(client, header, (size_t)header_len);
     write_all(client, body, body_len);
   }
+}
+
+static void set_client_timeouts(int client) {
+  struct timeval tv;
+  tv.tv_sec = CLIENT_TIMEOUT_SEC;
+  tv.tv_usec = 0;
+  setsockopt(client, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+  setsockopt(client, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
 }
 
 static void log_response(const char *method, const char *path, const char *status) {
@@ -1889,6 +1898,7 @@ static void send_diagnostics(int client) {
 }
 
 static void handle_client(int client) {
+  set_client_timeouts(client);
   char request[4096 + MAX_BODY];
   ssize_t got = read(client, request, sizeof(request) - 1);
   if (got <= 0) {
@@ -2010,6 +2020,14 @@ static void handle_client(int client) {
   }
 }
 
+static void *client_thread_main(void *arg) {
+  int client = *(int *)arg;
+  free(arg);
+  handle_client(client);
+  close(client);
+  return NULL;
+}
+
 static int create_server(void) {
   int server = socket(AF_INET, SOCK_STREAM, 0);
   if (server < 0) {
@@ -2063,8 +2081,19 @@ int main(void) {
       }
       break;
     }
-    handle_client(client);
-    close(client);
+    int *client_ptr = malloc(sizeof(*client_ptr));
+    if (!client_ptr) {
+      close(client);
+      continue;
+    }
+    *client_ptr = client;
+    pthread_t client_thread;
+    if (pthread_create(&client_thread, NULL, client_thread_main, client_ptr) == 0) {
+      pthread_detach(client_thread);
+    } else {
+      free(client_ptr);
+      close(client);
+    }
   }
   close(server);
   g_shutdown = 1;

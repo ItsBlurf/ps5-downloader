@@ -30,6 +30,7 @@ jobs:
       - uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
+          overwrite_files: true
           files: |
             release/ps5-downloader-gui-linux-x86_64
             release/ps5-downloader-gui-linux-x86_64.sha256
@@ -57,6 +58,7 @@ jobs:
       - uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
+          overwrite_files: true
           files: |
             release/ps5-downloader-gui-windows-x86_64.exe
             release/ps5-downloader-gui-windows-x86_64.exe.sha256

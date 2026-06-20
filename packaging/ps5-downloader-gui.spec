@@ -3,8 +3,8 @@
 block_cipher = None
 
 a = Analysis(
-    ["../src/ps5_downloader/desktop/app.py"],
-    pathex=[".."],
+    ["../src/ps5_downloader/desktop_launcher.py"],
+    pathex=["../src"],
     binaries=[],
     datas=[],
     hiddenimports=[
